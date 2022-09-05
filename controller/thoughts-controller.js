@@ -54,5 +54,71 @@ const thoughtsController = {
         })
         .catch((err) => res.json(err));
     },
-    updateThoughts
-}
+    // Update
+    updateThoughts ({params,body},res){
+        Thoughts.findOneAndUpdate({_id:params.id},body,{
+            new:true,
+            runValidators: true,
+        })
+        .then((thoughtsData) => {
+            if (ThoughtsData) {
+                res.status(404).json({message:"We couldn't find a thought associated with this id."});
+                return;
+            }
+            res.json(thoughtsData);
+        })
+        .catch((err) => res.json(err));
+    },
+    // Delete
+    deleteThoughts({params},res){
+        Thoughts.findOneAndDelete({_id: params.id})
+        .then((thoughtsData) => {
+            if(!thoughtsData) {
+                return res.status(404).json({ message:"There is no thought with this id."});
+            }
+            // remove id from thoughts field
+            return User.findOneAndUpdate(
+                {thoughts:params.id},
+                {$pull:{thpights:params.id}},
+                {new:true}
+            );
+        })
+        .then((userData)=> {
+            if(!userData) {
+                return res
+                .status(404)
+                .json({ message: "your thought has been created, But is not associated with a id."})
+            }
+            res.json({ message:"your thought has successfully been deleted."});
+        })
+        .catch((err) => res.json(err))
+    },
+    // REACTIONS
+    //  Add reactions
+    addReaction({params,body},res){
+        Thoughts.findOneAndUpdate(
+            {_id:params.thoughtsId},
+            {$addToSet: {reactions:body}},
+            {new:true, runValidators:true}
+        )
+        .then((thoughtsData)=>{
+            if(!thoughtsData) {
+                res.status(404).json({ message:"There's no thought associated with this Id."});
+                return;
+            }
+            res.json(thoughtsData);
+        })
+        .catch((err) => res.json(err));
+    },
+    // Delete reactions
+    deleteReaction({params},res){
+        Thoughts.findOneAndUpdate(
+            {_id: params.thoughtsId},
+            {$pull: {reactions:{reactionsId: params.reactionsId}}},
+            {new:true}
+        )
+        .then(thoughtsData => res.json(thoughtsData))
+        .catch((err)=> res.json(err));
+    },
+};
+module.exports = thoughtsController
