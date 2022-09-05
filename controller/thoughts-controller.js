@@ -61,7 +61,7 @@ const thoughtsController = {
             runValidators: true,
         })
         .then((thoughtsData) => {
-            if (ThoughtsData) {
+            if (thoughtsData) {
                 res.status(404).json({message:"We couldn't find a thought associated with this id."});
                 return;
             }
